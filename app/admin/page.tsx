@@ -75,10 +75,6 @@ export default function AdminPage() {
       return
     }
     const { error: insErr } = await supabase.from("catalogs").insert({ user_id: userId, name: "Mi Catálogo" })
-    if (insErr) {
-      toast.error(insErr.message)
-      return
-    }
     const { data: afterInsert, error: reSelErr } = await supabase
       .from("catalogs")
       .select("id,name")
@@ -89,7 +85,13 @@ export default function AdminPage() {
       return
     }
     const created = (afterInsert || []) as Catalog[]
-    if (created.length) setCatalog(created[0])
+    if (created.length) {
+      setCatalog(created[0])
+      return
+    }
+    if (insErr) {
+      toast.error(insErr.message)
+    }
   }
 
   async function refreshCsrf() {
