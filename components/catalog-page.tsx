@@ -23,7 +23,7 @@ const parsePriceString = (priceStr: string | number): number => {
 // Si NO lo querés, poné 0 o comentá el setInterval (más abajo).
 const AUTO_REFRESH_MS = 0 // ej: 10000 para 10s. Dejalo 0 si no querés polling.
 
-export function CatalogPage() {
+export function CatalogPage({ catalogId }: { catalogId?: string }) {
   const [products, setProducts] = useState<Product[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   // MODIFICACIÓN 1: Inicializar selectedCategory a "Todos"
@@ -65,7 +65,8 @@ export function CatalogPage() {
 
       try {
         const source = process.env.NEXT_PUBLIC_DATA_SOURCE || "sheets"
-        const productsData = source === "supabase" ? await fetchProductsFromSupabase() : await fetchProductsFromSheets()
+        const productsData =
+          source === "supabase" ? await fetchProductsFromSupabase(catalogId) : await fetchProductsFromSheets()
         const normalized = normalizeProducts(productsData)
 
         if (!cancelled) {

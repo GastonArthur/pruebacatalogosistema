@@ -47,7 +47,7 @@ app.get("/api/products", async (_req, res) => {
 })
 
 app.post("/api/products", csrfProtection, async (req, res) => {
-  const { nombre, descripcion, categoria, sku, variantes } = req.body || {}
+  const { nombre, descripcion, categoria, sku, variantes, catalog_id } = req.body || {}
   if (!nombre || !sku) return res.status(400).json({ error: "Nombre y SKU son obligatorios" })
   const { error } = await supabase.from("products").insert({
     nombre: sanitize(nombre),
@@ -55,6 +55,7 @@ app.post("/api/products", csrfProtection, async (req, res) => {
     categoria: sanitize(categoria || ""),
     sku: sanitize(sku),
     variantes: variantes ?? null,
+    catalog_id,
   })
   if (error) return res.status(500).json({ error: error.message })
   return res.status(201).json({ ok: true })

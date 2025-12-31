@@ -24,6 +24,8 @@ export default function ProductosAdminPage() {
   const [ready, setReady] = useState(false)
   const [products, setProducts] = useState<ProductRow[]>([])
   const [creating, setCreating] = useState(false)
+  const [catalogs, setCatalogs] = useState<{ id: string; name: string }[]>([])
+  const [selectedCatalogId, setSelectedCatalogId] = useState<string>("")
   const [form, setForm] = useState({
     nombre: "",
     descripcion: "",
@@ -41,10 +43,18 @@ export default function ProductosAdminPage() {
       }
       setReady(true)
       await refreshCsrf()
+      await loadCatalogs()
       await loadProducts()
     }
     void run()
   }, [router])
+
+  async function loadCatalogs() {
+    const { data } = await supabase.from("catalogs").select("id,name").order("created_at", { ascending: true })
+    const list = (data || []) as any
+    setCatalogs(list)
+    if (!selectedCatalogId && list.length) setSelectedCatalogId(list[0].id)
+  }
 
   async function refreshCsrf() {
     try {
@@ -57,7 +67,9 @@ export default function ProductosAdminPage() {
   }
 
   async function loadProducts() {
-    const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false })
+    let query = supabase.from("products").select("*").order("created_at", { ascending: false })
+    if (selectedCatalogId) query = query.eq("catalog_id", selectedCatalogId)
+    const { data, error } = await query
     if (error) {
       toast.error(error.message)
       return
@@ -72,6 +84,7 @@ export default function ProductosAdminPage() {
       descripcion: form.descripcion,
       categoria: form.categoria,
       sku: form.sku,
+      catalog_id: selectedCatalogId,
     }
     const res = await fetch(`${BACKEND_URL}/api/products`, {
       method: "POST",
@@ -164,6 +177,21 @@ export default function ProductosAdminPage() {
           <div className="border border-border rounded-lg p-4">
             <h3 className="font-semibold mb-4">Crear producto</h3>
             <div className="space-y-3">
+              <div>
+                <Label htmlFor="catalog">Catálogo</Label>
+                <select
+                  id="catalog"
+                  className="w-full px-2 py-1.5 border border-border rounded"
+                  value={selectedCatalogId}
+                  onChange={(e) => setSelectedCatalogId(e.target.value)}
+                >
+                  {catalogs.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <Label htmlFor="nombre">Nombre</Label>
                 <Input id="nombre" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} />

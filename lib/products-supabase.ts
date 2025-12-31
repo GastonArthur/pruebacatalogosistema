@@ -15,8 +15,10 @@ export type ProductRow = {
   images?: { url: string }[]
 }
 
-export async function fetchProductsFromSupabase(): Promise<SheetProduct[]> {
-  const { data, error } = await supabase.from("products").select("*, images:images(url)")
+export async function fetchProductsFromSupabase(catalogId?: string): Promise<SheetProduct[]> {
+  let query = supabase.from("products").select("*, images:images(url)")
+  if (catalogId) query = query.eq("catalog_id", catalogId)
+  const { data, error } = await query
   if (error || !data) return []
   return data.map((p: ProductRow) => ({
     id: p.id,
@@ -34,4 +36,3 @@ export async function fetchProductsFromSupabase(): Promise<SheetProduct[]> {
     categoria: p.categoria,
   }))
 }
-
