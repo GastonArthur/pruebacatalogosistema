@@ -93,3 +93,13 @@ create policy "images public read" on public.images
   for select
   to anon
   using (true);
+
+create policy "profiles self read" on public.profiles
+  for select
+  using (auth.uid() = id);
+create policy "profiles self insert" on public.profiles
+  for insert
+  with check (auth.uid() = id);
+create policy "profiles self update" on public.profiles
+  for update
+  using (auth.uid() = id);

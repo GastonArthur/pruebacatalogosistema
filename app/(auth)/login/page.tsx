@@ -46,6 +46,13 @@ export default function LoginPage() {
       toast.error(msg)
       return
     }
+    const { data: userData } = await supabase.auth.getUser()
+    const u = userData.user
+    if (u) {
+      await supabase
+        .from("profiles")
+        .upsert({ id: u.id, email: values.email, full_name: (u.user_metadata as any)?.full_name })
+    }
     router.replace("/admin")
   }
 
