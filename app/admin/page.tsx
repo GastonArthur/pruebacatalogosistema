@@ -54,7 +54,15 @@ export default function AdminPage() {
     const { data } = await supabase.from("catalogs").select("id,name").order("created_at", { ascending: true })
     const list = (data || []) as Catalog[]
     if (!list.length) {
-      const { data: inserted, error } = await supabase.from("catalogs").insert({ name: "Mi Catálogo" }).select("id,name").single()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      const userId = user?.id
+      const { data: inserted, error } = await supabase
+        .from("catalogs")
+        .insert({ user_id: userId, name: "Mi Catálogo" })
+        .select("id,name")
+        .single()
       if (error) {
         toast.error(error.message)
         return

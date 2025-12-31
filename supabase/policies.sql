@@ -94,6 +94,40 @@ create policy "images public read" on public.images
   to anon
   using (true);
 
+-- Branding: dueño del catálogo puede CRUD, lectura pública opcional NO (mantener privada)
+create policy "branding owner read" on public.branding
+  for select
+  using (
+    exists (
+      select 1 from public.catalogs c
+      where c.id = catalog_id and c.user_id = auth.uid()
+    )
+  );
+create policy "branding owner update" on public.branding
+  for update
+  using (
+    exists (
+      select 1 from public.catalogs c
+      where c.id = catalog_id and c.user_id = auth.uid()
+    )
+  );
+create policy "branding owner delete" on public.branding
+  for delete
+  using (
+    exists (
+      select 1 from public.catalogs c
+      where c.id = catalog_id and c.user_id = auth.uid()
+    )
+  );
+create policy "branding owner insert" on public.branding
+  for insert
+  with check (
+    exists (
+      select 1 from public.catalogs c
+      where c.id = catalog_id and c.user_id = auth.uid()
+    )
+  );
+
 create policy "profiles self read" on public.profiles
   for select
   using (auth.uid() = id);
