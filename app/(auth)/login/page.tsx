@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -25,11 +25,22 @@ type FormValues = z.infer<typeof schema>
 export default function LoginPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [verifiedMsg, setVerifiedMsg] = useState("")
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get("verified") === "1") {
+        setVerifiedMsg("Email verificado correctamente")
+        toast.success("Email verificado correctamente")
+      }
+    }
+  }, [])
 
   async function onSubmit(values: FormValues) {
     setLoading(true)
@@ -76,6 +87,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="w-full max-w-md bg-card border border-border rounded-lg p-6 shadow-sm">
         <h1 className="text-2xl font-bold mb-4">Acceder</h1>
+        {verifiedMsg ? (
+          <div className="mb-4 p-3 rounded border border-green-300 bg-green-100 text-green-800 text-sm">{verifiedMsg}</div>
+        ) : null}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <Label htmlFor="email">Email</Label>

@@ -49,7 +49,7 @@ export default function RegisterPage() {
     }
     setLoading(false)
     toast.success("Registrado. Revisá tu correo y confirmá tu email.")
-    router.replace("/login")
+    router.replace(`/auth/confirm-email?email=${encodeURIComponent(values.email)}`)
   }
 
   async function signupWithGoogle() {
