@@ -34,7 +34,7 @@ export default function RegisterPage() {
 
   async function onSubmit(values: FormValues) {
     setLoading(true)
-    const { error } = await supabase.auth.signUp({
+    const { error: signUpError } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
       options: {
@@ -42,13 +42,22 @@ export default function RegisterPage() {
         emailRedirectTo: typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : undefined,
       },
     })
-    setLoading(false)
-    if (error) {
-      toast.error(error.message)
+    if (signUpError) {
+      setLoading(false)
+      toast.error(signUpError.message)
       return
     }
-    toast.success("Registrado. Revisa tu correo para confirmar.")
-    router.replace("/login")
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email: values.email,
+      options: { shouldCreateUser: false },
+    })
+    setLoading(false)
+    if (otpError) {
+      toast.error(otpError.message)
+      return
+    }
+    toast.success("Te enviamos un código de verificación a tu email.")
+    router.replace(`/auth/verify?email=${encodeURIComponent(values.email)}`)
   }
 
   async function signupWithGoogle() {
@@ -103,4 +112,3 @@ export default function RegisterPage() {
     </div>
   )
 }
-

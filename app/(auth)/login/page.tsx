@@ -39,7 +39,11 @@ export default function LoginPage() {
     })
     setLoading(false)
     if (error) {
-      toast.error(error.message)
+      const msg =
+        /Email not confirmed/i.test(error.message) || /invalid_grant/i.test(error.message)
+          ? "Debes verificar tu email. Revisá tu correo o verifica con código."
+          : error.message
+      toast.error(msg)
       return
     }
     router.replace("/admin")
@@ -92,4 +96,3 @@ export default function LoginPage() {
     </div>
   )
 }
-
