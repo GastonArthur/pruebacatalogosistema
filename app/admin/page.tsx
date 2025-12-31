@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { Card } from "@/components/ui/card"
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000"
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? ""
 
 type Catalog = { id: string; name: string }
 type Branding = { logo_url?: string | null; primary_color?: string | null; secondary_color?: string | null }
@@ -74,7 +74,9 @@ export default function AdminPage() {
       setCatalog(list[0])
       return
     }
-    const { error: insErr } = await supabase.from("catalogs").insert({ user_id: userId, name: "Mi Catálogo" }, { returning: "minimal" })
+    const { error: insErr } = await supabase
+      .from("catalogs")
+      .upsert({ user_id: userId, name: "Mi Catálogo" }, { onConflict: "user_id", returning: "minimal" })
     const { data: afterInsert, error: reSelErr } = await supabase
       .from("catalogs")
       .select("id,name")
@@ -95,6 +97,10 @@ export default function AdminPage() {
   }
 
   async function refreshCsrf() {
+    if (!BACKEND_URL) {
+      setCsrfToken(null)
+      return
+    }
     try {
       const res = await fetch(`${BACKEND_URL}/api/csrf-token`, { credentials: "include" })
       const json = await res.json()

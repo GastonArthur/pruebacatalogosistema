@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000"
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? ""
 
 type ProductRow = {
   id: string
@@ -61,6 +61,10 @@ export default function ProductosAdminPage() {
   }
 
   async function refreshCsrf() {
+    if (!BACKEND_URL) {
+      setCsrfToken(null)
+      return
+    }
     try {
       const res = await fetch(`${BACKEND_URL}/api/csrf-token`, { credentials: "include" })
       const json = await res.json()
@@ -89,6 +93,11 @@ export default function ProductosAdminPage() {
       categoria: form.categoria,
       sku: form.sku,
       catalog_id: selectedCatalogId,
+    }
+    if (!BACKEND_URL) {
+      toast.error("Backend no configurado (NEXT_PUBLIC_BACKEND_URL).")
+      setCreating(false)
+      return
     }
     const res = await fetch(`${BACKEND_URL}/api/products`, {
       method: "POST",
