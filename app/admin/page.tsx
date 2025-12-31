@@ -74,7 +74,7 @@ export default function AdminPage() {
       setCatalog(list[0])
       return
     }
-    const { error: insErr } = await supabase.from("catalogs").insert({ user_id: userId, name: "Mi Catálogo" })
+    const { error: insErr } = await supabase.from("catalogs").insert({ user_id: userId, name: "Mi Catálogo" }, { returning: "minimal" })
     const { data: afterInsert, error: reSelErr } = await supabase
       .from("catalogs")
       .select("id,name")

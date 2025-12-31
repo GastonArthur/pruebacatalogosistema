@@ -1,18 +1,23 @@
 -- Catálogos: dueño puede CRUD, público puede leer productos asociados
+drop policy if exists "catalog owner read" on public.catalogs;
 create policy "catalog owner read" on public.catalogs
   for select
   using (auth.uid() = user_id);
+drop policy if exists "catalog owner update" on public.catalogs;
 create policy "catalog owner update" on public.catalogs
   for update
   using (auth.uid() = user_id);
+drop policy if exists "catalog owner delete" on public.catalogs;
 create policy "catalog owner delete" on public.catalogs
   for delete
   using (auth.uid() = user_id);
+drop policy if exists "catalog owner insert" on public.catalogs;
 create policy "catalog owner insert" on public.catalogs
   for insert
   with check (auth.uid() = user_id);
 
 -- Productos: dueño del catálogo puede CRUD
+drop policy if exists "products owner read" on public.products;
 create policy "products owner read" on public.products
   for select
   using (
@@ -21,6 +26,7 @@ create policy "products owner read" on public.products
       where c.id = catalog_id and c.user_id = auth.uid()
     )
   );
+drop policy if exists "products owner update" on public.products;
 create policy "products owner update" on public.products
   for update
   using (
@@ -29,6 +35,7 @@ create policy "products owner update" on public.products
       where c.id = catalog_id and c.user_id = auth.uid()
     )
   );
+drop policy if exists "products owner delete" on public.products;
 create policy "products owner delete" on public.products
   for delete
   using (
@@ -37,6 +44,7 @@ create policy "products owner delete" on public.products
       where c.id = catalog_id and c.user_id = auth.uid()
     )
   );
+drop policy if exists "products owner insert" on public.products;
 create policy "products owner insert" on public.products
   for insert
   with check (
@@ -47,12 +55,14 @@ create policy "products owner insert" on public.products
   );
 
 -- Productos públicos lectura sin auth
+drop policy if exists "products public read" on public.products;
 create policy "products public read" on public.products
   for select
   to anon
   using (true);
 
 -- Imágenes: mismas reglas que productos
+drop policy if exists "images products owner read" on public.images;
 create policy "images products owner read" on public.images
   for select
   using (
@@ -62,6 +72,7 @@ create policy "images products owner read" on public.images
       where p.id = product_id and c.user_id = auth.uid()
     )
   );
+drop policy if exists "images products owner update" on public.images;
 create policy "images products owner update" on public.images
   for update
   using (
@@ -71,6 +82,7 @@ create policy "images products owner update" on public.images
       where p.id = product_id and c.user_id = auth.uid()
     )
   );
+drop policy if exists "images products owner delete" on public.images;
 create policy "images products owner delete" on public.images
   for delete
   using (
@@ -80,6 +92,7 @@ create policy "images products owner delete" on public.images
       where p.id = product_id and c.user_id = auth.uid()
     )
   );
+drop policy if exists "images products owner insert" on public.images;
 create policy "images products owner insert" on public.images
   for insert
   with check (
@@ -89,12 +102,14 @@ create policy "images products owner insert" on public.images
       where p.id = product_id and c.user_id = auth.uid()
     )
   );
+drop policy if exists "images public read" on public.images;
 create policy "images public read" on public.images
   for select
   to anon
   using (true);
 
 -- Branding: dueño del catálogo puede CRUD, lectura pública opcional NO (mantener privada)
+drop policy if exists "branding owner read" on public.branding;
 create policy "branding owner read" on public.branding
   for select
   using (
@@ -103,6 +118,7 @@ create policy "branding owner read" on public.branding
       where c.id = catalog_id and c.user_id = auth.uid()
     )
   );
+drop policy if exists "branding owner update" on public.branding;
 create policy "branding owner update" on public.branding
   for update
   using (
@@ -111,6 +127,7 @@ create policy "branding owner update" on public.branding
       where c.id = catalog_id and c.user_id = auth.uid()
     )
   );
+drop policy if exists "branding owner delete" on public.branding;
 create policy "branding owner delete" on public.branding
   for delete
   using (
@@ -119,6 +136,7 @@ create policy "branding owner delete" on public.branding
       where c.id = catalog_id and c.user_id = auth.uid()
     )
   );
+drop policy if exists "branding owner insert" on public.branding;
 create policy "branding owner insert" on public.branding
   for insert
   with check (
@@ -128,12 +146,15 @@ create policy "branding owner insert" on public.branding
     )
   );
 
+drop policy if exists "profiles self read" on public.profiles;
 create policy "profiles self read" on public.profiles
   for select
   using (auth.uid() = id);
+drop policy if exists "profiles self insert" on public.profiles;
 create policy "profiles self insert" on public.profiles
   for insert
   with check (auth.uid() = id);
+drop policy if exists "profiles self update" on public.profiles;
 create policy "profiles self update" on public.profiles
   for update
   using (auth.uid() = id);

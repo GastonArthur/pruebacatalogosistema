@@ -1,3 +1,5 @@
+create extension if not exists pgcrypto;
+
 -- Catálogos 1:N con usuarios
 create table if not exists public.catalogs (
   id uuid primary key default gen_random_uuid(),
