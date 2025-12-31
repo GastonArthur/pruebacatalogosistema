@@ -39,7 +39,6 @@ export default function RegisterPage() {
       password: values.password,
       options: {
         data: { full_name: values.fullName },
-        emailRedirectTo: getRedirectUrl("/auth/callback"),
       },
     })
     if (signUpError) {
@@ -48,8 +47,8 @@ export default function RegisterPage() {
       return
     }
     setLoading(false)
-    toast.success("Registrado. Revisá tu correo y confirmá tu email.")
-    router.replace(`/auth/confirm-email?email=${encodeURIComponent(values.email)}`)
+    toast.success("Cuenta creada. Ahora podés iniciar sesión.")
+    router.replace("/login")
   }
 
   async function signupWithGoogle() {
