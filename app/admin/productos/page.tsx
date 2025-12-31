@@ -50,7 +50,11 @@ export default function ProductosAdminPage() {
   }, [router])
 
   async function loadCatalogs() {
-    const { data } = await supabase.from("catalogs").select("id,name").order("created_at", { ascending: true })
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    const userId = user?.id
+    const { data } = await supabase.from("catalogs").select("id,name").eq("user_id", userId).order("created_at", { ascending: true })
     const list = (data || []) as any
     setCatalogs(list)
     if (!selectedCatalogId && list.length) setSelectedCatalogId(list[0].id)

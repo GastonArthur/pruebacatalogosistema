@@ -51,26 +51,45 @@ export default function AdminPage() {
   }, [router])
 
   async function ensureSingleCatalog() {
-    const { data } = await supabase.from("catalogs").select("id,name").order("created_at", { ascending: true })
-    const list = (data || []) as Catalog[]
-    if (!list.length) {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      const userId = user?.id
-      const { data: inserted, error } = await supabase
-        .from("catalogs")
-        .insert({ user_id: userId, name: "Mi Catálogo" })
-        .select("id,name")
-        .single()
-      if (error) {
-        toast.error(error.message)
-        return
-      }
-      setCatalog(inserted as Catalog)
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    const userId = user?.id
+    if (!userId) {
+      toast.error("Sesión no válida. Volvé a iniciar sesión.")
+      router.replace("/login")
       return
     }
-    setCatalog(list[0])
+    const { data: existing, error: selErr } = await supabase
+      .from("catalogs")
+      .select("id,name")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: true })
+    if (selErr) {
+      toast.error(selErr.message)
+      return
+    }
+    const list = (existing || []) as Catalog[]
+    if (list.length) {
+      setCatalog(list[0])
+      return
+    }
+    const { error: insErr } = await supabase.from("catalogs").insert({ user_id: userId, name: "Mi Catálogo" })
+    if (insErr) {
+      toast.error(insErr.message)
+      return
+    }
+    const { data: afterInsert, error: reSelErr } = await supabase
+      .from("catalogs")
+      .select("id,name")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: true })
+    if (reSelErr) {
+      toast.error(reSelErr.message)
+      return
+    }
+    const created = (afterInsert || []) as Catalog[]
+    if (created.length) setCatalog(created[0])
   }
 
   async function refreshCsrf() {
