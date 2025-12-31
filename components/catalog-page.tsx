@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { type Product, fetchProductsFromSheets } from "@/lib/google-sheets"
+import { fetchProductsFromSupabase } from "@/lib/products-supabase"
 import { ProductCard } from "@/components/product-card"
 import { CartDrawer } from "@/components/cart-drawer"
 import { useCart } from "@/context/cart-context"
@@ -63,7 +64,8 @@ export function CatalogPage() {
       if (!isBackgroundRefresh) setLoading(true)
 
       try {
-        const productsData = await fetchProductsFromSheets()
+        const source = process.env.NEXT_PUBLIC_DATA_SOURCE || "sheets"
+        const productsData = source === "supabase" ? await fetchProductsFromSupabase() : await fetchProductsFromSheets()
         const normalized = normalizeProducts(productsData)
 
         if (!cancelled) {
