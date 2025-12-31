@@ -1,21 +1,16 @@
--- Usuarios: cada uno sólo puede ver/editar su fila
-create policy "users self read" on public.users
-  for select
-  using (auth.uid() = id);
-create policy "users self write" on public.users
-  for update
-  using (auth.uid() = id);
-create policy "users self insert" on public.users
-  for insert
-  with check (auth.uid() = id);
-
 -- Catálogos: dueño puede CRUD, público puede leer productos asociados
 create policy "catalog owner read" on public.catalogs
   for select
   using (auth.uid() = user_id);
-create policy "catalog owner write" on public.catalogs
-  for all
+create policy "catalog owner update" on public.catalogs
+  for update
   using (auth.uid() = user_id);
+create policy "catalog owner delete" on public.catalogs
+  for delete
+  using (auth.uid() = user_id);
+create policy "catalog owner insert" on public.catalogs
+  for insert
+  with check (auth.uid() = user_id);
 
 -- Productos: dueño del catálogo puede CRUD
 create policy "products owner read" on public.products
@@ -26,9 +21,25 @@ create policy "products owner read" on public.products
       where c.id = catalog_id and c.user_id = auth.uid()
     )
   );
-create policy "products owner write" on public.products
-  for all
+create policy "products owner update" on public.products
+  for update
   using (
+    exists (
+      select 1 from public.catalogs c
+      where c.id = catalog_id and c.user_id = auth.uid()
+    )
+  );
+create policy "products owner delete" on public.products
+  for delete
+  using (
+    exists (
+      select 1 from public.catalogs c
+      where c.id = catalog_id and c.user_id = auth.uid()
+    )
+  );
+create policy "products owner insert" on public.products
+  for insert
+  with check (
     exists (
       select 1 from public.catalogs c
       where c.id = catalog_id and c.user_id = auth.uid()
@@ -51,9 +62,27 @@ create policy "images products owner read" on public.images
       where p.id = product_id and c.user_id = auth.uid()
     )
   );
-create policy "images products owner write" on public.images
-  for all
+create policy "images products owner update" on public.images
+  for update
   using (
+    exists (
+      select 1 from public.products p
+      join public.catalogs c on c.id = p.catalog_id
+      where p.id = product_id and c.user_id = auth.uid()
+    )
+  );
+create policy "images products owner delete" on public.images
+  for delete
+  using (
+    exists (
+      select 1 from public.products p
+      join public.catalogs c on c.id = p.catalog_id
+      where p.id = product_id and c.user_id = auth.uid()
+    )
+  );
+create policy "images products owner insert" on public.images
+  for insert
+  with check (
     exists (
       select 1 from public.products p
       join public.catalogs c on c.id = p.catalog_id
