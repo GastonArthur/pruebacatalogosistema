@@ -91,3 +91,18 @@ export async function getUser() {
 export async function signOut() {
   await supabase.auth.signOut()
 }
+
+export function getAppBaseUrl() {
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_VERCEL_URL
+  if (envUrl) {
+    const hasProtocol = /^https?:\/\//i.test(envUrl)
+    return hasProtocol ? envUrl : `https://${envUrl}`
+  }
+  if (typeof window !== "undefined") return window.location.origin
+  return ""
+}
+
+export function getRedirectUrl(path = "/auth/callback") {
+  const base = getAppBaseUrl()
+  return base ? `${base}${path}` : undefined
+}

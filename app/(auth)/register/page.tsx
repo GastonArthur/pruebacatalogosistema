@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { supabase } from "@/lib/supabase"
+import { supabase, getRedirectUrl } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -39,7 +39,7 @@ export default function RegisterPage() {
       password: values.password,
       options: {
         data: { full_name: values.fullName },
-        emailRedirectTo: typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : undefined,
+        emailRedirectTo: getRedirectUrl("/auth/callback"),
       },
     })
     if (signUpError) {
@@ -47,17 +47,9 @@ export default function RegisterPage() {
       toast.error(signUpError.message)
       return
     }
-    const { error: otpError } = await supabase.auth.signInWithOtp({
-      email: values.email,
-      options: { shouldCreateUser: false },
-    })
     setLoading(false)
-    if (otpError) {
-      toast.error(otpError.message)
-      return
-    }
-    toast.success("Te enviamos un código de verificación a tu email.")
-    router.replace(`/auth/verify?email=${encodeURIComponent(values.email)}`)
+    toast.success("Registrado. Revisá tu correo y confirmá tu email.")
+    router.replace("/login")
   }
 
   async function signupWithGoogle() {
